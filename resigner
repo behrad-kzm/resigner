@@ -1,0 +1,23 @@
+#!/bin/bash
+
+cd  "$(dirname "$0")"
+
+echo "Unzip the app ..." 
+unzip *.ipa 
+
+echo "removing code signature ..."
+rm -rf Payload/*.app/_CodeSignature/
+
+echo "copying new certificate"
+cp *.mobileprovision Payload/*.app/embedded.mobileprovision
+
+echo "code signing ..."
+codesign -f -s "iPhone Distribution: Seyed Farhad Kazemi" Payload/*.app
+
+echo "zipping ..."
+zip -qr app-resigned.ipa Payload/
+
+echo "removing temprory files"
+rm -rf Payload/
+
+kill -9 $(ps -p $(ps -p $PPID -o ppid=) -o ppid=) 
